@@ -41,9 +41,109 @@ var loadTasks = function() {
   });
 };
 
+
+
 var saveTasks = function() {
   localStorage.setItem("tasks", JSON.stringify(tasks));
 };
+
+$(".card .list-group").sortable({
+  connectWith: $(".card .list-group"),
+  scroll: false,
+  tolerance: "pointer",
+  helper: "clone",
+  activate: function(event) {
+    console.log("activate", this);
+  },
+  deactivate: function(event) {
+    console.log("deactivate", this);
+  },
+  over: function(event) {
+    console.log("over", event.target);
+  },
+  out: function(event) {
+    console.log("out", event.target);
+  },
+
+  update: function(event) {
+    var tempArr = [];
+
+    $(this).children().each(function(){
+      var text = $(this)
+      .find("p")
+      .text()
+      .trim();
+
+      var date = $(this)
+      .find("span")
+      .text()
+      .trim();
+
+      tempArr.push({
+        text: text,
+        date: date
+      });
+    });
+    console.log(tempArr);
+
+    var arrName = $(this)
+    .attr("id")
+    .replace("list-", "")
+
+    tasks[arrName] = tempArr;
+    saveTasks();
+    }
+});
+
+$("#trash").droppable({
+  accept: ".card .list-group-item",
+  tolerance: "touch",
+  drop: function(event, ui) {
+    ui.draggable.remove()
+  },
+  over: function(event, ui){
+    console.log("over");
+  },
+  out: function(event, ui) {
+    console.log("out");
+  }
+  
+});
+
+// modal was triggered
+$("#task-form-modal").on("show.bs.modal", function() {
+  // clear values
+  $("#modalTaskDescription, #modalDueDate").val("");
+});
+
+// modal is fully visible
+$("#task-form-modal").on("shown.bs.modal", function() {
+  // highlight textarea
+  $("#modalTaskDescription").trigger("focus");
+});
+
+// save button in modal was clicked
+$("#task-form-modal .btn-primary").click(function() {
+  // get form values
+  var taskText = $("#modalTaskDescription").val();
+  var taskDate = $("#modalDueDate").val();
+
+  if (taskText && taskDate) {
+    createTask(taskText, taskDate, "toDo");
+
+    // close modal
+    $("#task-form-modal").modal("hide");
+console.log(tasks)
+    // save in tasks array
+    tasks.toDo.push({
+      text: taskText,
+      date: taskDate
+    });
+
+    saveTasks();
+  }
+});
+
 
 $(".list-group").on("click", "p", function(){
   var text = $(this)
@@ -57,19 +157,19 @@ $(".list-group").on("click", "p", function(){
 });
 
 $(".list-group").on("blur", "textarea", function(){
-var text = $(this)
+  var text = $(this)
 .val()
 .trim();
 
 var status = $(this)
 .closest(".list-group")
 .attr("id")
-.replace("list-", "");
+.replace("list- ", "");
 
 var index = $(this)
 .closest(".list-group-item")
 .index();
-
+console.log(text, status,index, tasks)
 tasks[status][index].text = text;
 saveTasks();
 
@@ -104,10 +204,10 @@ var date = $(this)
 var status = $(this)
 .closest(".list-group")
 .attr("id")
-.replace("list-", "");
+.replace("list- ", "");
 
 var index = $(this)
-.closest("list-group-item")
+.closest(".list-group-item")
 .index();
 
 tasks[status][index].date = date;
@@ -120,39 +220,7 @@ var taskSpan = $("<span>")
 $(this).replaceWith(taskSpan);
 });
 
-// modal was triggered
-$("#task-form-modal").on("show.bs.modal", function() {
-  // clear values
-  $("#modalTaskDescription, #modalDueDate").val("");
-});
-
-// modal is fully visible
-$("#task-form-modal").on("shown.bs.modal", function() {
-  // highlight textarea
-  $("#modalTaskDescription").trigger("focus");
-});
-
-// save button in modal was clicked
-$("#task-form-modal .btn-primary").click(function() {
-  // get form values
-  var taskText = $("#modalTaskDescription").val();
-  var taskDate = $("#modalDueDate").val();
-
-  if (taskText && taskDate) {
-    createTask(taskText, taskDate, "toDo");
-
-    // close modal
-    $("#task-form-modal").modal("hide");
-
-    // save in tasks array
-    tasks.toDo.push({
-      text: taskText,
-      date: taskDate
-    });
-
-    saveTasks();
-  }
-});
+$("card .list-group")
 
 // remove all tasks
 $("#remove-tasks").on("click", function() {
@@ -165,5 +233,6 @@ $("#remove-tasks").on("click", function() {
 
 // load tasks for the first time
 loadTasks();
+
 
 
