@@ -1,4 +1,11 @@
-var tasks = {};
+var tasks = {
+  toDo: [],
+  inProgress: [],
+  inReview: [],
+  done: []
+};
+
+
 
 var createTask = function(taskText, taskDate, taskList) {
   // create elements that make up a task item
@@ -164,12 +171,15 @@ $(".list-group").on("blur", "textarea", function(){
 var status = $(this)
 .closest(".list-group")
 .attr("id")
-.replace("list- ", "");
+.replace("list-", "");
+
+
 
 var index = $(this)
 .closest(".list-group-item")
 .index();
 console.log(text, status,index, tasks)
+
 tasks[status][index].text = text;
 saveTasks();
 
@@ -204,7 +214,7 @@ var date = $(this)
 var status = $(this)
 .closest(".list-group")
 .attr("id")
-.replace("list- ", "");
+.replace("list-", "");
 
 var index = $(this)
 .closest(".list-group-item")
